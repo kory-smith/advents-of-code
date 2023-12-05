@@ -1019,25 +1019,36 @@ const map = {
   nine: 9,
 };
 
-let sum = 0;
-for (const string of input.split("\n")) {
-  const oopsAllDigits = stringToDigit(string);
-  const justNumbers = oopsAllDigits.replace(/\D/g, "");
+function korysVersion(input) {
+  let sum = 0;
+  const individualValues = [];
+  for (const string of input.split("\n")) {
+    const oopsAllDigits = stringToDigit(string);
+    const justNumbers = oopsAllDigits.replace(/\D/g, "");
 
+  const firstDigit = justNumbers[0];
   const firstDigit = justNumbers[0];
 	if (justNumbers.length === 1) {
 		sum += Number(firstDigit)
 		continue;
 	}
-  const lastDigit = justNumbers[justNumbers.length - 1];
+    const firstDigit = justNumbers[0];
+	if (justNumbers.length === 1) {
+		sum += Number(firstDigit)
+		continue;
+	}
+    const lastDigit = justNumbers[justNumbers.length - 1];
 
-  // console.log({pre: string, post: oopsAllDigits})
-  const doubleDigit = `${firstDigit}${lastDigit}`;
+    // console.log({pre: string, post: oopsAllDigits})
+    const doubleDigit = `${firstDigit}${lastDigit}`;
 
-  const calibrationValue = Number(doubleDigit);
+    const calibrationValue = Number(doubleDigit);
 
-  // console.log({ string, oopsAllDigits, justNumbers, doubleDigit });
-  sum += calibrationValue;
+    // console.log({ string, oopsAllDigits, justNumbers, doubleDigit });
+    sum += calibrationValue;
+    individualValues.push(calibrationValue)
+  }
+  return individualValues;
 }
 
 // Convert two934seven1 into 23471
@@ -1074,21 +1085,76 @@ function doodad(string) {
   return numberDigitToReturn;
 }
 
-console.log(
-  "Does doodad applied on 'eightwothree' return 'eight'?",
-  doodad("eightwothree") === "eight"
-);
+function theRightVersion(input) {
+  const individualValues = [];
+  const lines = input.split("\n");
+  // Popping the blank line in end
+  let sum1 = 0;
+  let sum2 = 0;
+  // SETUP
+  
+  // SOLUTION -- START
+  const digits = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+  const wordToInt = digits.reduce((acc, w, i) => ({...acc, [w]: i + 1}), {})
+  
+  const convertToInt = (s) => {
+    if (digits.includes(s)) return wordToInt[s]
+    else return Number.parseInt(s)
+  }
+  
+  const getCalibrationValue = (pattern, line) => {
+    const matches = [...line.matchAll(pattern)];
+    if (matches.length > 0) {
+      const fnum = convertToInt(matches[0][1])
+      const lnum = convertToInt(matches[matches.length - 1][1])
+      return fnum * 10 + lnum
+    }
+    return 0
+  }
+  
+  const re1 = /(\d)/g
+  const re2 = /(?=(\d|one|two|three|four|five|six|seven|eight|nine))/g
+  lines.forEach((line) => {
+    const cv1 = getCalibrationValue(re1, line)
+    const cv2 = getCalibrationValue(re2, line)
+    sum1 += cv1
+    sum2 += cv2
+    individualValues.push(cv2)
+  })
+  
+  // SOLUTION -- END
+  return individualValues
+}
 
-console.log(
-  "Does stringToDigit turn 'eightwothree' into '8wo3'?",
-  stringToDigit("eightwothree") === "8wo3"
-);
+const digits = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+const wordToInt = digits.reduce((acc, w, i) => ({...acc, [w]: i + 1}), {})
 
-console.assert(
-  stringToDigit("zoneight234") === "z1ight234",
-  `Expected stringToDigit to return z1ight243 for string "zoneight234" but it returned ${stringToDigit(
-    "zoneight234"
-  )}`
-);
+const convertToInt = (s) => {
+  if (digits.includes(s)) return wordToInt[s]
+  else return Number.parseInt(s)
+}
 
-console.log({sum})
+function digIn(line) {
+  const matches = [...line.matchAll(/(?=(\d|one|two|three|four|five|six|seven|eight|nine))/g)];
+  if (matches.length > 0) {
+    const fnum = convertToInt(matches[0][1])
+    const lnum = convertToInt(matches[matches.length - 1][1])
+    return fnum * 10 + lnum
+  }
+  return 0
+}
+
+const korys = korysVersion(input)
+const correct = theRightVersion(input)
+
+const splitInput = input.split("\n")
+for (let i = 0; i <= splitInput.length; i++) {
+  const rightNumber = correct[i]
+  const korysNumber = korys[i]
+
+  if (rightNumber !== korysNumber) {
+    console.log(`Problem with index ${i}. That's the string ${splitInput[i]}`)
+    console.log("Kory had the following for it: ", stringToDigit(splitInput[i]))
+    console.log("But it would correctly be: ", digIn(splitInput[i]))
+  }
+}
