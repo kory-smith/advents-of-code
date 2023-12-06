@@ -1027,16 +1027,6 @@ function korysVersion(input) {
     const justNumbers = oopsAllDigits.replace(/\D/g, "");
 
   const firstDigit = justNumbers[0];
-  const firstDigit = justNumbers[0];
-	if (justNumbers.length === 1) {
-		sum += Number(firstDigit)
-		continue;
-	}
-    const firstDigit = justNumbers[0];
-	if (justNumbers.length === 1) {
-		sum += Number(firstDigit)
-		continue;
-	}
     const lastDigit = justNumbers[justNumbers.length - 1];
 
     // console.log({pre: string, post: oopsAllDigits})
