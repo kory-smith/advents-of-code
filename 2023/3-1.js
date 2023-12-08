@@ -170,7 +170,6 @@ function calculateSchematicSum(schematic) {
   while ((match = digitsRE.exec(flatSchematic)) !== null) {
     if (
       check({
-        // We might be off by one here.
         endIndex: match.index + match[0].length,
         startIndex: match.index,
         rowLength: rowLength,
@@ -186,9 +185,6 @@ function calculateSchematicSum(schematic) {
     .reduce((a, b) => a + b);
   // First, we find a digit. Defined as one or more numbers separated by a word break or a period.
   // We need to know the index where the number starts and ends.
-
-  // I don't think we'll split it, actually.
-  // const iterable = schematic.split("\n").shift()
 
   // right is index + 1
   // . x t
@@ -207,8 +203,6 @@ function calculateSchematicSum(schematic) {
   // . y .
 
   // and it's the same for above + right / left and below + right / left
-
-  // we will have to do this for each item in a number, don't forget. 443 will need to be checked for each character
 }
 
 // Stolen from stackoverflow
