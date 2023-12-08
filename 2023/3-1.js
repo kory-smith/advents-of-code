@@ -152,22 +152,38 @@ const testInput = `
 ...$.*....
 .664.598..`;
 
-const symbol = /[^a-zA-Z0-9]/;
+const symbol = /[^a-zA-Z0-9\.\s]/;
 
-// DON"T FORGET TO TRIM THE FIRST LINE. I did this so it's easier to read
 function calculateSchematicSum(schematic) {
-  const flatSchematic = schematic.replace("\n", "");
+  const flatSchematic = schematic.replace(/\n/g, "");
+
+  // Ignore the first line because I purposesly left the first line blank for ease of reading
+  const rowLength = schematic.split("\n")[1].length;
 
   const digitsRE = /\d+/g;
 
-  let match = digitsRE.exec(flatSchematic);
+  let match;
 
-	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
-	// https://stackoverflow.com/questions/2295657/return-positions-of-a-regex-match-in-javascript
-	while ((match = digitsRE.exec(flatSchematic)) !== null) {
-		console.log({match})
-	}
+  const relevantPartNumbers = [];
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
+  // https://stackoverflow.com/questions/2295657/return-positions-of-a-regex-match-in-javascript
+  while ((match = digitsRE.exec(flatSchematic)) !== null) {
+    if (
+      check({
+        // We might be off by one here.
+        endIndex: match.index + match[0].length,
+        startIndex: match.index,
+        rowLength: rowLength,
+        schematic: flatSchematic,
+        partNumber: match[0],
+      })
+    )
+      relevantPartNumbers.push(match);
+  }
 
+  return relevantPartNumbers
+    .map((thing) => Number(thing))
+    .reduce((a, b) => a + b);
   // First, we find a digit. Defined as one or more numbers separated by a word break or a period.
   // We need to know the index where the number starts and ends.
 
@@ -195,4 +211,33 @@ function calculateSchematicSum(schematic) {
   // we will have to do this for each item in a number, don't forget. 443 will need to be checked for each character
 }
 
-console.log(calculateSchematicSum(testInput));
+// Stolen from stackoverflow
+function range(size, startAt = 0) {
+  return [...Array(size).keys()].map((i) => i + startAt);
+}
+
+function check({ schematic, rowLength, startIndex, endIndex, partNumber }) {
+  const indicesToCheck = range(endIndex - startIndex, startIndex);
+
+  for (const index of indicesToCheck) {
+    // Right
+    if (schematic[index + 1]?.match(symbol)) return true;
+    // Left
+    else if (schematic[index - 1]?.match(symbol)) return true;
+    // Below
+    else if (schematic[index + rowLength]?.match(symbol)) return true;
+    // Below right
+    else if (schematic[index + rowLength + 1]?.match(symbol)) return true;
+    // Below left
+    else if (schematic[index + rowLength - 1]?.match(symbol)) return true;
+    // Above
+    else if (schematic[index - rowLength]?.match(symbol)) return true;
+    // Above + right
+    else if (schematic[index - rowLength + 1]?.match(symbol)) return true;
+    // Above + left
+    else if (schematic[index - rowLength - 1]?.match(symbol)) return true;
+  }
+  return false;
+}
+
+console.log(calculateSchematicSum(input));
