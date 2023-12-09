@@ -277,7 +277,11 @@ humidityToLocation map:
 
 // Stolen from stackoverflow
 function range(size, startAt = 0) {
-  return [...Array(size).keys()].map((i) => i + startAt);
+  const range = [];
+  for (let i = startAt; range.length < size; i++) {
+    range.push(i);
+  }
+  return range;
 }
 
 const mapKeys = [
@@ -331,8 +335,10 @@ function getSeeds(input) {
 }
 
 function buildMaps(input) {
+	console.log("Building maps")
   const maps = {};
   for (const mapKey of mapKeys) {
+    console.log("Building map for ", mapKey);
     maps[mapKey] = {};
     const currentMap = maps[mapKey];
 
@@ -346,6 +352,7 @@ function buildMaps(input) {
     const numbers = match[1].split("\n").filter((thing) => thing);
 
     for (const scheme of numbers) {
+			console.log("Doing a scheme")
       const [destinationStart, sourceStart, rangeLength] = scheme.split(" ");
 
       const sourceStartNum = Number(sourceStart);
@@ -360,6 +367,7 @@ function buildMaps(input) {
       });
     }
   }
+	console.log("All done with the maps")
   return maps;
 }
 
