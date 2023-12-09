@@ -275,15 +275,16 @@ humidityToLocation map:
 60 56 37
 56 93 4`;
 
-// Stolen from stackoverflow
-function range(size, startAt = 0) {
-	console.log("Running range function")
-  const range = [];
-  for (let i = startAt; range.length < size; i++) {
-    range.push(i);
+class KorRange {
+  constructor(start, end, offset) {
+    this.start = start;
+    this.end = end;
+    this.offset = offset;
   }
-	console.log("Done with range function")
-  return range;
+
+  contains(number) {
+    return number >= this.start && number <= this.end;
+  }
 }
 
 const mapKeys = [
@@ -308,20 +309,22 @@ function findLowestLocationNumbers(input) {
   return smallestLocation;
 }
 
+function findNextOrigin(map, number) {
+  let finalNumber = number;
+  for (const range of map) {
+    const rangeContainsNumber = range.contains(finalNumber);
+    if (rangeContainsNumber) {
+      return finalNumber - range.offset;
+    }
+  }
+  return finalNumber;
+}
+
 function traceLocation(seedNumber, maps) {
   let origin = seedNumber;
-  // console.log("Looking for seed ", seedNumber)
   for (const mapKey in maps) {
     const map = maps[mapKey];
-    const mappingExists = Boolean(map[origin]);
-    if (!mappingExists) {
-      // console.log(`Number for ${mapKey} ${origin} is ${origin}`)
-      continue;
-    } else {
-      // console.log(`Number for ${mapKey} ${origin}...`)
-      origin = map[origin];
-      // console.log(`...is ${origin}`)
-    }
+    origin = findNextOrigin(map, origin);
   }
   return origin;
 }
@@ -337,11 +340,9 @@ function getSeeds(input) {
 }
 
 function buildMaps(input) {
-	console.log("Building maps")
   const maps = {};
   for (const mapKey of mapKeys) {
-    console.log("Building map for ", mapKey);
-    maps[mapKey] = {};
+    maps[mapKey] = [];
     const currentMap = maps[mapKey];
 
     // zoo wee mama
@@ -354,24 +355,21 @@ function buildMaps(input) {
     const numbers = match[1].split("\n").filter((thing) => thing);
 
     for (const scheme of numbers) {
-			console.log("Doing a scheme")
       const [destinationStart, sourceStart, rangeLength] = scheme.split(" ");
 
       const sourceStartNum = Number(sourceStart);
       const destinationStartNum = Number(destinationStart);
       const rangeLengthNum = Number(rangeLength);
 
-      const sourceRange = range(rangeLengthNum, sourceStartNum);
-      const destinationRange = range(rangeLengthNum, destinationStartNum);
+      const range = new KorRange(
+        sourceStartNum,
+        sourceStartNum + rangeLengthNum,
+        sourceStartNum - destinationStartNum
+      );
 
-			console.log("Actually building the map")
-      sourceRange.forEach((item, index) => {
-        currentMap[item] = destinationRange[index];
-      });
-			console.log("Built the map")
+      currentMap.push(range);
     }
   }
-	console.log("All done with the maps")
   return maps;
 }
 
