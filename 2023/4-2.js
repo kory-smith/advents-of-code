@@ -294,6 +294,7 @@ function calculatePointsTotal(scratchcards) {
 
     additionalCards.forEach((card) => work.push(card));
   }
+	// Won cards PLUS the amount of cards we started this
   return work.length + biggest
 }
 
