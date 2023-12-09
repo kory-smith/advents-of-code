@@ -277,10 +277,12 @@ humidityToLocation map:
 
 // Stolen from stackoverflow
 function range(size, startAt = 0) {
+	console.log("Running range function")
   const range = [];
   for (let i = startAt; range.length < size; i++) {
     range.push(i);
   }
+	console.log("Done with range function")
   return range;
 }
 
@@ -362,9 +364,11 @@ function buildMaps(input) {
       const sourceRange = range(rangeLengthNum, sourceStartNum);
       const destinationRange = range(rangeLengthNum, destinationStartNum);
 
+			console.log("Actually building the map")
       sourceRange.forEach((item, index) => {
         currentMap[item] = destinationRange[index];
       });
+			console.log("Built the map")
     }
   }
 	console.log("All done with the maps")
