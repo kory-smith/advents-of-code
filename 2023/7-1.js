@@ -1034,13 +1034,35 @@ const handScore = {
 function calculateWinnings(input) {}
 
 function determineWinnerBetweenTwoSameTypedHands(hand1, hand2) {
-  return cardScore[hand1[0]] > cardScore[hand2[0]] ? hand1 : hand2;
+  for (let i = 0; i < hand1.length; i++) {
+    if (cardScore[hand1[i]] === cardScore[hand2[i]]) continue;
+    return cardScore[hand1[i]] > cardScore[hand2[i]] ? 1 : -1;
+  }
 }
 
-function sortHandsWinningFirst(hands) {}
+function sortHandsWinningFirst(hands) {
+  return hands.toSorted((hand1, hand2) => {
+    const hand1Hand = calculateHand(hand1);
+    const hand2Hand = calculateHand(hand2);
+
+    if (hand1Hand === hand2Hand) {
+      return determineWinnerBetweenTwoSameTypedHands(hand2, hand1);
+    }
+
+    return hand2Hand - hand1Hand;
+  });
+}
 
 // You give it "T55J5" and it gives you "threeOfAKind"
-function calculateHand(hand) {}
+function calculateHand(hand) {
+  if (isFiveOfAKind(hand)) return handScore.fiveOfAKind;
+  else if (isFourOfAKind(hand)) return handScore.fourOfAKind;
+  else if (isFullHouse(hand)) return handScore.fullHouse;
+  else if (isThreeOfAKind(hand)) return handScore.threeOfAKind;
+  else if (isTwoPair(hand)) return handScore.twoPair;
+  else if (isOnePair(hand)) return handScore.onePair;
+  else return handScore.highCard;
+}
 
 //
 function createHandMap(hand) {
@@ -1100,14 +1122,12 @@ function isOnePair(hand) {
   const handMap = createHandMap(hand);
   const uniqueCards = Object.keys(handMap);
   if (uniqueCards.length === 4) {
-    // In English: there are two cards with a value of two or more.
-    return (
-      uniqueCards.filter((card) => Number(handMap[card]) >= 2).length === 1
-    );
+    return true;
   } else return false;
 }
 ///
 
-console.log(isOnePair("55431"));
-console.log(isOnePair("55441"));
+console.log(
+  sortHandsWinningFirst(["32T3K", "T55J5", "KK677", "KTJJT", "QQQJA"])
+);
 // console.log(calculateWinnings(testInput));
