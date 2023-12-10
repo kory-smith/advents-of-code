@@ -1127,7 +1127,4 @@ function isOnePair(hand) {
 }
 ///
 
-console.log(
-  sortHandsWinningFirst(["32T3K", "T55J5", "KK677", "KTJJT", "QQQJA"])
-);
-// console.log(calculateWinnings(testInput));
+console.log(calculateWinnings(input));
