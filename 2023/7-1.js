@@ -1031,7 +1031,29 @@ const handScore = {
   highCard: 0,
 };
 
-function calculateWinnings(input) {}
+function calculateWinnings(input) {
+  let total = 0;
+
+  const sydney = {};
+  for (const line of input.split("\n")) {
+    const [hand, bid] = line.split(" ");
+
+    sydney[hand] = Number(bid);
+  }
+
+  const sortedHands = sortLosingHandsFirst(Object.keys(sydney));
+
+  const kory = {};
+
+  for (let i = 1; i <= sortedHands.length; i++) {
+    kory[sortedHands[i - 1]] = i;
+  }
+  
+	for (const hand in kory) {
+		total += kory[hand] * sydney[hand]
+	}
+	return total
+}
 
 function determineWinnerBetweenTwoSameTypedHands(hand1, hand2) {
   for (let i = 0; i < hand1.length; i++) {
@@ -1040,16 +1062,16 @@ function determineWinnerBetweenTwoSameTypedHands(hand1, hand2) {
   }
 }
 
-function sortHandsWinningFirst(hands) {
+function sortLosingHandsFirst(hands) {
   return hands.toSorted((hand1, hand2) => {
     const hand1Hand = calculateHand(hand1);
     const hand2Hand = calculateHand(hand2);
 
     if (hand1Hand === hand2Hand) {
-      return determineWinnerBetweenTwoSameTypedHands(hand2, hand1);
+      return determineWinnerBetweenTwoSameTypedHands(hand1, hand2);
     }
 
-    return hand2Hand - hand1Hand;
+    return hand1Hand - hand2Hand;
   });
 }
 
