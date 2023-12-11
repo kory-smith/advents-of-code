@@ -795,25 +795,26 @@ function countStepsToZZZ(input) {
   return walkNodesAndReportStepCount(instructions, map);
 }
 
-// We have to do something recursively. Like, if we
-function walkNodesAndReportStepCount(instructions, nodes) {
+// prettier-ignore
+function walkNodesAndReportStepCount( instructions, nodes, nodeToStartAt = "AAA") {
   let steps = 0;
-  // For now, we always start at AAA
-  let next = nodes["AAA"];
-	// If we finish this and aren't there yet, we have to continue somehow...
+  let nextOptions = nodes[nodeToStartAt];
+  let nextNode;
   for (const step of instructions) {
     steps++;
-    const nextNode = next[step];
+    nextNode = nextOptions[step];
     if (nextNode === "ZZZ") {
       return steps;
     } else {
-      next = nodes[nextNode];
+      nextOptions = nodes[nextNode];
     }
   }
+  // If we've finished the loop, keep running the loop and pick up where we left off.
+  return steps + walkNodesAndReportStepCount(instructions, nodes, nextNode);
 }
 
 function makeInstructions(instructionString) {
-  return instructionString.replace("R", "1").replace("L", "0");
+  return instructionString.replace(/R/g, "1").replace(/L/g, "0");
 }
 
 function makeMap(justNodes) {
@@ -832,4 +833,4 @@ function makeMap(justNodes) {
   return map;
 }
 
-console.log(countStepsToZZZ(testInput2));
+console.log(countStepsToZZZ(input));
