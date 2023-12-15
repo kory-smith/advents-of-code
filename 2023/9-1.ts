@@ -232,7 +232,6 @@ function calculateAllValues(histories: string) {
   let total = 0;
   for (const history of histories.split("\n")) {
 		const result = calculateNextValue(history)
-		console.log({result, history})
     total += result
   }
   return total;
