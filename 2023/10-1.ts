@@ -264,68 +264,39 @@ function determineSTrueIdentity(inputWithNewlines: string) {
   })[0];
 }
 
-function findLoopLength(inputWithNewlines: string) {
+// WAIT. it's just loop.length / 2, right? If I can find the length of the loop, I'm done?
+function walkPipesAndReportLength(inputWithNewlines: string) {
   const rowLength = inputWithNewlines.split("\n")[1].length;
-  const trueInput = inputWithNewlines.replace(
+  const inputWithoutNewlines = inputWithNewlines.replace(/\n/g, "");
+  const startingPoint = inputWithoutNewlines.indexOf("S");
+  const startShape = determineSTrueIdentity(inputWithNewlines);
+  const trueInput = inputWithoutNewlines.replace(
     "S",
     determineSTrueIdentity(inputWithNewlines)
   );
-  const trueInputWithoutNewlines = trueInput.replace(/\n/g, "");
 
-  // Now, all we have to do is find every pipe that connects to exactly two other pipes!
-  const loopItems: string[] = [];
-  for (let i = 0; i < trueInputWithoutNewlines.length; i++) {
-    const current = trueInputWithoutNewlines[i];
-    const currentIsPipe = Object.keys(pipes).some((pipe) => pipe === current);
-    if (!currentIsPipe) continue;
-    let connections = 0;
-    ["n", "s", "e", "w"].forEach((direction) => {
-      const positionFormula = directionLookup[direction]
-        .replace("i", i)
-        .replace("l", rowLength);
-      const indexOfPossibleConnection = eval(positionFormula);
-      const possibleConnection =
-        trueInputWithoutNewlines[indexOfPossibleConnection];
-      if (!possibleConnection) return;
-      const possibleConnectionIsPipe = Object.keys(pipes).some(
-        (pipe) => pipe === possibleConnection
-      );
-      if (!possibleConnectionIsPipe) return;
-      if (
-        pipesConnect(
-          { piece: current as keyof typeof pipes, position: i },
-          {
-            piece: possibleConnection as keyof typeof pipes,
-            position: indexOfPossibleConnection,
-          },
-          rowLength
-        )
-      ) {
-        console.log(
-          `CONNECTED ${current} to ${possibleConnection}. Positions: ${i} and ${indexOfPossibleConnection}. This brings the total connections to ${
-            connections + 1
-          }`
-        );
-        connections++;
-      }
-    });
-    if (connections === 2) {
-      loopItems.push(current);
-    }
-  }
-  return loopItems.length;
+  let currentPoint = startingPoint;
+  let loopLength = 0;
+  // Just pick one!
+  let nextDirection = pipes[startShape][0];
+  do {
+    const formula = directionLookup[nextDirection]
+      .replace("i", currentPoint)
+      .replace("l", rowLength);
+    const nextPoint = eval(formula);
+    const pipeAtNextPoint = trueInput[nextPoint];
+    const availableDirections = pipes[pipeAtNextPoint];
+    // NOW WE HAVE TRAVERSED AND CAN KNOW WHERE TO GO NEXT
+
+    // We came from opposite[nextDirection], so we can only go what's left
+    nextDirection = availableDirections.filter((direction) => {
+      return direction !== opposite[nextDirection];
+    })[0];
+    loopLength++;
+    currentPoint = nextPoint
+  } while (currentPoint !== startingPoint);
+
+  return loopLength;
 }
 
-// WAIT. it's just loop.length / 2, right? If I can find the length of the loop, I'm done?
-function walkPipes(input: string) {
-  /*  
-		You start on F. You can go directions[F]. This is only true for the starting node, maybe? Or at least, usefully so.
-		You go s. You're at |. You CANNOT go opposite[s], which is n. You must go to whichever direction is left. In our case, it's s again
-		You go s. You're at L. You cannot go opposite[s], which is n. You must go e. This repeats.
-		I wonder if you can simultaneously do this. You're done when both paths return to 
-	*/
-}
-
-// We know a pipe is a part of the main loop if it connects to two other pipes. Full stop.
-
-console.log(findLoopLength(clutteredTestInput) / 2);
+console.log(walkPipesAndReportLength(input) / 2);
