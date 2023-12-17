@@ -150,7 +150,7 @@ const input = `
 ....................................................................................#...................#..........................#........
 .....#.....#....................................#...................................................................#.......................
 ..........................................#............#....................................................................................
-...............#............................................#..................................#............................................`
+...............#............................................#..................................#............................................`;
 
 // First, we'll need to expand the galaxies!
 // This involves determining which rows and columns contain no galaxies, or # symbols.
@@ -228,7 +228,7 @@ function range(size, startAt = 0) {
   return [...Array(size).keys()].map((i) => i + startAt);
 }
 
-const EXPANSION_RATE = 1
+const EXPANSION_RATE = 1_000_000;
 
 function expandCosmos(
   input: string,
@@ -240,27 +240,31 @@ function expandCosmos(
   let temp = "";
   const rows = input.split("\n").slice(1);
   for (let i = 0; i < rows.length; i++) {
-		// This is the row as it currently sits.
+    // This is the row as it currently sits.
     const helper = Array.from(rows[i]);
     for (let j = 0; j < expansionMap.columns.length; j++) {
       const rowIndex = expansionMap.columns[j];
       if (j === 0) {
         helper.splice(rowIndex, 0, ...Array.from(".".repeat(EXPANSION_RATE)));
-				console.log({ helper, length: helper.length })
+        console.log({ helper, length: helper.length });
       } else {
-        helper.splice(rowIndex + j, 0, ...Array.from(".".repeat(EXPANSION_RATE)));
+        helper.splice(
+          rowIndex + j,
+          0,
+          ...Array.from(".".repeat(EXPANSION_RATE))
+        );
       }
     }
     if (expansionMap.rows.includes(i)) {
-			for (let k = 0; k < EXPANSION_RATE; k++) {
-				temp += ".".repeat(helper.length);
-				temp += "\n";
-			}
+      for (let k = 0; k < EXPANSION_RATE; k++) {
+        temp += ".".repeat(helper.length);
+        temp += "\n";
+      }
     }
     temp += helper.join("");
     temp += "\n";
   }
-	console.log(temp)
+  console.log(temp);
   return temp;
 }
 
@@ -275,7 +279,7 @@ function allIndicesOf(arr, value) {
 }
 
 function getGalaxyCoordinates(expandedInput: string) {
-  const rowLength = expandedInput.split("\n")[0].length;
+  const rowLength = expandedInput.split("\n")[1].length;
   const flatExpandedInput = expandedInput.replace(/\n/g, "");
   const galaxyIndices = allIndicesOf(Array.from(flatExpandedInput), "#");
 
@@ -301,30 +305,45 @@ function getUniquePairs(number: number) {
   return Array.from(pairs) as string[];
 }
 
-// Algebra baby
-function calculateManhattanDistance(point1: [number, number], point2: [number, number]) {
+function calculateManhattanDistance(
+  point1: [number, number],
+  point2: [number, number]
+) {
   const [x1, y1] = point1;
   const [x2, y2] = point2;
   return Math.abs(x2 - x1) + Math.abs(y2 - y1);
 }
 
+function expandGalaxies(galaxies, expansionMap, expansionRate) {
+  return galaxies.map(([x, y]) => {
+    const newX = x + expansionMap.columns.filter(col => col < x).length * (expansionRate - 1) ;
+    const newY = y + expansionMap.rows.filter(row => row < y).length * (expansionRate - 1) ;
+    return [newX, newY];
+  });
+}
 
 function doWork(input) {
-  const expandedCosmos = expandCosmos(input, createExpansionMap(input));
-  const galaxies = getGalaxyCoordinates(expandedCosmos);
-  const galaxyPairs = getUniquePairs(galaxies.length);
+  const expansionMap = createExpansionMap(input);
+  const galaxyCoordsBeforeExpansion = getGalaxyCoordinates(input);
+  const galaxyCoordsAfterExpansion = expandGalaxies(
+    galaxyCoordsBeforeExpansion,
+    expansionMap,
+    EXPANSION_RATE
+    );
+
+  const galaxyPairs = getUniquePairs(galaxyCoordsAfterExpansion.length);
 
   let shortestPathsSum = 0;
   for (const pair of galaxyPairs) {
-    const galaxy1Coordinates = galaxies[Number(pair.split("-")[0]) - 1];
-    const galaxy2Coordinates = galaxies[Number(pair.split("-")[1]) - 1];
+    const galaxy1Coordinates = galaxyCoordsAfterExpansion[Number(pair.split("-")[0]) - 1];
+    const galaxy2Coordinates = galaxyCoordsAfterExpansion[Number(pair.split("-")[1]) - 1];
 
     shortestPathsSum += calculateManhattanDistance(
       galaxy1Coordinates,
       galaxy2Coordinates
     );
   }
-	return shortestPathsSum
+  return shortestPathsSum;
 }
 
-console.log(doWork(testInput));
+console.log(doWork(input));
